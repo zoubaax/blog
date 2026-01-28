@@ -32,7 +32,7 @@ app.use(cors(corsOptions));
 app.use(express.json({ limit: '10kb' })); // Limit body size
 
 // 5. Data sanitization against XSS
-app.use(xss());
+// app.use(xss());
 
 // 6. Prevent parameter pollution
 app.use(hpp());
