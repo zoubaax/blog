@@ -4,6 +4,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Articles from './pages/Articles';
+import Events from './pages/Events';
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
         <Route path="/" element={<MainLayout />}>
           <Route index element={<Home />} />
           <Route path="articles" element={<Articles />} />
+          <Route path="events" element={<Events />} />
           <Route path="login" element={<Login />} />
           <Route path="dashboard" element={<Dashboard />} />
           {/* Add more routes here later */}
