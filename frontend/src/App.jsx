@@ -7,6 +7,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import DashboardHome from './pages/admin/DashboardHome';
 import AdminArticles from './pages/admin/AdminArticles';
+import CreateArticle from './pages/admin/CreateArticle';
 import Articles from './pages/Articles';
 import Events from './pages/Events';
 import Team from './pages/Team';
@@ -29,6 +30,7 @@ function App() {
           <Route path="/dashboard" element={<AdminLayout />}>
             <Route index element={<DashboardHome />} />
             <Route path="articles" element={<AdminArticles />} />
+            <Route path="articles/new" element={<CreateArticle />} />
             <Route path="events" element={<div>Events Manager (Coming Soon)</div>} />
             <Route path="team" element={<div>Team Manager (Coming Soon)</div>} />
           </Route>
