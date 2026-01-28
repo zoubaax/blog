@@ -1,25 +1,50 @@
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+const userModel = require('../models/userModel');
 const AppError = require('../utils/appError');
-// const User = require('../models/userModel'); // Example model import
-// const bcrypt = require('bcryptjs');
-// const jwt = require('jsonwebtoken');
-
-const register = async (userData) => {
-    // Business logic here: check if user exists, hash password, create user
-    // const existingUser = await User.findByEmail(userData.email);
-    // if (existingUser) throw new AppError('User already exists', 400);
-
-    // return newUser;
-    return { id: 1, ...userData }; // Mock return
-};
 
 const login = async (email, password) => {
-    // Business logic: find user, compare password, generate token
-    // if (!user || !isPasswordMatch) throw new AppError('Invalid credentials', 401);
+    const user = await userModel.findByEmail(email);
 
-    return 'mock_jwt_token';
+    // 1. Check if user exists
+    if (!user) {
+        throw new AppError('Invalid email or password', 401);
+    }
+
+    // 2. Check if password is correct
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+        throw new AppError('Invalid email or password', 401);
+    }
+
+    // 3. Generate JWT
+    const token = jwt.sign(
+        { id: user.id, role: user.role },
+        process.env.JWT_SECRET,
+        { expiresIn: '1d' }
+    );
+
+    // Remove password from output
+    delete user.password;
+
+    return { user, token };
+};
+
+const registerAdmin = async (username, email, password) => {
+    // Check if user already exists
+    const existingUser = await userModel.findByEmail(email);
+    if (existingUser) {
+        throw new AppError('Email already in use', 400);
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const newUser = await userModel.create(username, email, hashedPassword, 'admin');
+    return newUser;
 };
 
 module.exports = {
-    register,
-    login
+    login,
+    registerAdmin
 };
