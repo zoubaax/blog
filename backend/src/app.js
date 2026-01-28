@@ -14,6 +14,7 @@ app.use(express.json());
 app.use('/api/v1/auth', require('./routes/auth.routes'));
 app.use('/api/v1/articles', require('./routes/article.routes'));
 app.use('/api/v1/events', require('./routes/event.routes'));
+app.use('/api/v1/team', require('./routes/team.routes'));
 
 // 404 Handler
 app.use((req, res, next) => {
