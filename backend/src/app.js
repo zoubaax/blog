@@ -13,6 +13,7 @@ app.use(express.json());
 // Routes
 app.use('/api/v1/auth', require('./routes/auth.routes'));
 app.use('/api/v1/articles', require('./routes/article.routes'));
+app.use('/api/v1/events', require('./routes/event.routes'));
 
 // 404 Handler
 app.use((req, res, next) => {
