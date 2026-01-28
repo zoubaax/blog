@@ -19,16 +19,27 @@ api.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
-// Response interceptor to handle errors (e.g. token expiration)
+// Response interceptor
 api.interceptors.response.use(
-    (response) => response,
+    (response) => {
+        // Return the data directly, so we don't need .data in components
+        return response.data;
+    },
     (error) => {
-        // If 401 Unauthorized, maybe redirect to login or clear token
+        // Standardize error message
+        const message = error.response?.data?.message || 'Something went wrong';
+
+        // Auto-logout on 401 (Unauthorized)
         if (error.response && error.response.status === 401) {
-            // localStorage.removeItem('token');
-            // window.location.href = '/login';
+            // Only redirect if not already on login page to avoid loops
+            if (window.location.pathname !== '/login') {
+                localStorage.removeItem('token');
+                // Optional: Window reload or redirect
+                // window.location.href = '/login'; 
+            }
         }
-        return Promise.reject(error);
+
+        return Promise.reject(message);
     }
 );
 
