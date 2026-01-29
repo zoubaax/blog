@@ -8,6 +8,10 @@ import Login from './pages/Login';
 import DashboardHome from './pages/admin/DashboardHome';
 import AdminArticles from './pages/admin/AdminArticles';
 import CreateArticle from './pages/admin/CreateArticle';
+import AdminEvents from './pages/admin/AdminEvents';
+import CreateEvent from './pages/admin/CreateEvent';
+import AdminTeam from './pages/admin/AdminTeam';
+import CreateTeam from './pages/admin/CreateTeam';
 import Articles from './pages/Articles';
 import Events from './pages/Events';
 import Team from './pages/Team';
@@ -29,10 +33,15 @@ function App() {
         <Route element={<PrivateRoute />}>
           <Route path="/dashboard" element={<AdminLayout />}>
             <Route index element={<DashboardHome />} />
+
             <Route path="articles" element={<AdminArticles />} />
             <Route path="articles/new" element={<CreateArticle />} />
-            <Route path="events" element={<div>Events Manager (Coming Soon)</div>} />
-            <Route path="team" element={<div>Team Manager (Coming Soon)</div>} />
+
+            <Route path="events" element={<AdminEvents />} />
+            <Route path="events/new" element={<CreateEvent />} />
+
+            <Route path="team" element={<AdminTeam />} />
+            <Route path="team/new" element={<CreateTeam />} />
           </Route>
         </Route>
       </Routes>
