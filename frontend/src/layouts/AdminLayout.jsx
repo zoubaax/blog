@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, FileText, Calendar, Users, LogOut } from 'lucide-react';
+import { LayoutDashboard, FileText, Calendar, Users, LogOut, ClipboardList } from 'lucide-react';
 import authService from '../services/authService';
 
 const AdminLayout = () => {
@@ -17,6 +17,7 @@ const AdminLayout = () => {
         { path: '/dashboard/articles', label: 'Articles', icon: FileText },
         { path: '/dashboard/events', label: 'Events', icon: Calendar },
         { path: '/dashboard/team', label: 'Team', icon: Users },
+        { path: '/dashboard/applications', label: 'Applications', icon: ClipboardList },
     ];
 
     return (

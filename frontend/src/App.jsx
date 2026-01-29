@@ -15,6 +15,7 @@ import EditEvent from './pages/admin/EditEvent';
 import AdminEventRegistrations from './pages/admin/AdminEventRegistrations';
 import AdminTeam from './pages/admin/AdminTeam';
 import CreateTeam from './pages/admin/CreateTeam';
+import Applications from './pages/admin/Applications';
 import Articles from './pages/Articles';
 import ArticleDetail from './pages/ArticleDetail';
 import Events from './pages/Events';
@@ -52,6 +53,7 @@ function App() {
 
             <Route path="team" element={<AdminTeam />} />
             <Route path="team/new" element={<CreateTeam />} />
+            <Route path="applications" element={<Applications />} />
           </Route>
         </Route>
       </Routes>

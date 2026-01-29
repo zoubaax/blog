@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import articleService from '../services/articleService';
 import eventService from '../services/eventService';
 import teamService from '../services/teamService';
+import JoinForm from '../components/JoinForm';
 import {
     Calendar,
     ChevronRight,
@@ -290,25 +291,7 @@ const Home = () => {
                         </div>
 
                         <div className="lg:w-1/2">
-                            <form className="bg-slate-50 p-8 rounded-2xl border border-gray-100 shadow-sm space-y-6">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-black text-slate-700 uppercase tracking-widest">Full Name</label>
-                                        <input type="text" className="w-full px-4 py-3 rounded-lg border border-gray-200 outline-none focus:ring-4 focus:ring-blue-100 transition-all font-bold" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-black text-slate-700 uppercase tracking-widest">Email Address</label>
-                                        <input type="email" className="w-full px-4 py-3 rounded-lg border border-gray-200 outline-none focus:ring-4 focus:ring-blue-100 transition-all font-bold" />
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-xs font-black text-slate-700 uppercase tracking-widest">Message</label>
-                                    <textarea rows="5" className="w-full px-4 py-3 rounded-lg border border-gray-200 outline-none focus:ring-4 focus:ring-blue-100 transition-all font-bold resize-none"></textarea>
-                                </div>
-                                <button type="button" className="w-full py-4 bg-blue-700 text-white font-black rounded shadow-lg hover:bg-blue-800 transition-all uppercase tracking-[0.2em] text-sm">
-                                    Send Message
-                                </button>
-                            </form>
+                            <JoinForm />
                         </div>
                     </div>
                 </div>
