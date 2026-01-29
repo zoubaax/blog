@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import registrationService from '../../services/registrationService';
 import eventService from '../../services/eventService';
-import { ArrowLeft, Loader2, Mail, Phone, School, User, Calendar, MapPin, Search } from 'lucide-react';
+import { ArrowLeft, Loader2, Mail, Phone, School, User, Calendar, MapPin, Search, Download } from 'lucide-react';
+import { exportToCSV } from '../../utils/exportUtils';
 
 const AdminEventRegistrations = () => {
     const { eventId } = useParams();
@@ -48,7 +49,7 @@ const AdminEventRegistrations = () => {
                 >
                     <ArrowLeft className="w-5 h-5 text-gray-600" />
                 </button>
-                <div>
+                <div className="flex-1">
                     <h1 className="text-2xl font-bold text-gray-900">Event Registrations</h1>
                     {event && (
                         <p className="text-sm text-gray-500 flex items-center gap-2 mt-1">
@@ -57,6 +58,13 @@ const AdminEventRegistrations = () => {
                         </p>
                     )}
                 </div>
+                <button
+                    onClick={() => exportToCSV(filteredRegistrations, `registrations_${event?.title || 'event'}`, ['Full Name', 'Email', 'Phone', 'School Name', 'Created At'])}
+                    className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-semibold shadow-sm"
+                >
+                    <Download className="w-4 h-4" />
+                    Export CSV
+                </button>
             </div>
 
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 space-y-6">
