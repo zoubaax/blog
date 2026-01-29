@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import eventService from '../../services/eventService';
-import { Plus, Trash2, Calendar, MapPin, Loader2 } from 'lucide-react';
+import { Plus, Trash2, Calendar, MapPin, Loader2, Users } from 'lucide-react';
 
 const AdminEvents = () => {
     const [events, setEvents] = useState([]);
@@ -63,9 +63,16 @@ const AdminEvents = () => {
                             <span>{event.location}</span>
                         </div>
 
-                        <p className="text-gray-600 text-sm line-clamp-2 mt-auto">
+                        <p className="text-gray-600 text-sm line-clamp-2 mt-auto mb-4">
                             {event.description}
                         </p>
+
+                        <NavLink
+                            to={`/dashboard/events/${event.id}/registrations`}
+                            className="flex items-center justify-center gap-2 w-full py-2 bg-gray-50 text-blue-600 rounded-lg text-sm font-semibold hover:bg-blue-50 transition-colors"
+                        >
+                            <Users className="w-4 h-4" /> View Participants
+                        </NavLink>
                     </div>
                 ))}
             </div>

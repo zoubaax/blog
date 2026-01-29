@@ -42,8 +42,8 @@ const EventCard = ({ event }) => {
 
                 {/* Optional: Add a "Register" or "Details" button logic */}
                 <div className="mt-auto">
-                    <Link to={`/events/${event.id}`} className="text-sm font-semibold text-blue-600 hover:text-blue-700 inline-flex items-center">
-                        View Details <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                    <Link to={`/events/${event.id}`} className="text-base font-bold text-blue-600 hover:text-blue-700 inline-flex items-center bg-blue-50 px-4 py-2 rounded-xl transition-all hover:bg-blue-100">
+                        Register Now <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                     </Link>
                 </div>
             </div>
