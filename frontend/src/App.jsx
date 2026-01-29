@@ -10,6 +10,7 @@ import AdminArticles from './pages/admin/AdminArticles';
 import CreateArticle from './pages/admin/CreateArticle';
 import AdminEvents from './pages/admin/AdminEvents';
 import CreateEvent from './pages/admin/CreateEvent';
+import EditEvent from './pages/admin/EditEvent';
 import AdminEventRegistrations from './pages/admin/AdminEventRegistrations';
 import AdminTeam from './pages/admin/AdminTeam';
 import CreateTeam from './pages/admin/CreateTeam';
@@ -42,6 +43,7 @@ function App() {
 
             <Route path="events" element={<AdminEvents />} />
             <Route path="events/new" element={<CreateEvent />} />
+            <Route path="events/edit/:id" element={<EditEvent />} />
             <Route path="events/:eventId/registrations" element={<AdminEventRegistrations />} />
 
             <Route path="team" element={<AdminTeam />} />

@@ -1,5 +1,12 @@
 const db = require('../config/db');
 
+// Public view: only visible events
+const findAllVisible = async () => {
+    const result = await db.query('SELECT * FROM events WHERE is_hidden = false ORDER BY date ASC');
+    return result.rows;
+};
+
+// Admin view: all events including hidden ones
 const findAll = async () => {
     const result = await db.query('SELECT * FROM events ORDER BY date ASC');
     return result.rows;
@@ -10,21 +17,25 @@ const findById = async (id) => {
     return result.rows[0];
 };
 
-const create = async (title, description, date, location, coverImageUrl) => {
+const create = async (title, description, date, location, coverImageUrl, registrationDeadline, maxParticipants) => {
     const result = await db.query(
-        'INSERT INTO events (title, description, date, location, cover_image_url) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-        [title, description, date, location, coverImageUrl]
+        'INSERT INTO events (title, description, date, location, cover_image_url, registration_deadline, max_participants) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+        [title, description, date, location, coverImageUrl, registrationDeadline, maxParticipants]
     );
     return result.rows[0];
 };
 
-const update = async (id, title, description, date, location, coverImageUrl) => {
+const update = async (id, title, description, date, location, coverImageUrl, is_hidden, registrationDeadline, maxParticipants) => {
     const result = await db.query(
         `UPDATE events 
      SET title = $1, description = $2, date = $3, location = $4, 
-         cover_image_url = COALESCE($5, cover_image_url), updated_at = CURRENT_TIMESTAMP 
-     WHERE id = $6 RETURNING *`,
-        [title, description, date, location, coverImageUrl, id]
+         cover_image_url = COALESCE($5, cover_image_url), 
+         is_hidden = $6,
+         registration_deadline = $7,
+         max_participants = $8,
+         updated_at = CURRENT_TIMESTAMP 
+     WHERE id = $9 RETURNING *`,
+        [title, description, date, location, coverImageUrl, is_hidden, registrationDeadline, maxParticipants, id]
     );
     return result.rows[0];
 };
@@ -36,6 +47,7 @@ const remove = async (id) => {
 
 module.exports = {
     findAll,
+    findAllVisible,
     findById,
     create,
     update,

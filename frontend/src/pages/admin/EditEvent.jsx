@@ -1,10 +1,11 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import eventService from '../../services/eventService';
 import ImageUpload from '../../components/ImageUpload';
-import { Save, ArrowLeft, Loader2, Calendar, MapPin, Users, clock, Clock } from 'lucide-react';
+import { Save, ArrowLeft, Loader2, Calendar, MapPin, Eye, EyeOff, Clock, Users } from 'lucide-react';
 
-const CreateEvent = () => {
+const EditEvent = () => {
+    const { id } = useParams();
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
         title: '',
@@ -12,16 +13,51 @@ const CreateEvent = () => {
         date: '',
         location: '',
         cover_image_url: '',
+        is_hidden: false,
         registration_deadline: '',
         max_participants: ''
     });
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+
+    useEffect(() => {
+        const fetchEvent = async () => {
+            try {
+                const res = await eventService.getById(id);
+                const event = res.data;
+
+                // Format dates for datetime-local input
+                const formatDate = (isoStr) => {
+                    if (!isoStr) return '';
+                    const date = new Date(isoStr);
+                    return date.toISOString().slice(0, 16);
+                };
+
+                setFormData({
+                    title: event.title,
+                    description: event.description,
+                    date: formatDate(event.date),
+                    location: event.location,
+                    cover_image_url: event.cover_image_url,
+                    is_hidden: event.is_hidden,
+                    registration_deadline: formatDate(event.registration_deadline),
+                    max_participants: event.max_participants || ''
+                });
+            } catch (error) {
+                alert('Failed to fetch event data');
+                navigate('/dashboard/events');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchEvent();
+    }, [id, navigate]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true);
+        setSaving(true);
 
-        // Prepare data: convert empty string to null for optional numbers
         const submitData = {
             ...formData,
             max_participants: formData.max_participants === '' ? null : parseInt(formData.max_participants),
@@ -29,14 +65,21 @@ const CreateEvent = () => {
         };
 
         try {
-            await eventService.create(submitData);
+            await eventService.update(id, submitData);
             navigate('/dashboard/events');
         } catch (error) {
-            alert('Failed to create event');
+            alert('Failed to update event');
         } finally {
-            setLoading(false);
+            setSaving(false);
         }
     };
+
+    if (loading) return (
+        <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
+            <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
+            <p className="text-gray-500 font-medium">Loading event details...</p>
+        </div>
+    );
 
     return (
         <div className="max-w-2xl mx-auto space-y-6 pb-20">
@@ -47,7 +90,7 @@ const CreateEvent = () => {
                 >
                     <ArrowLeft className="w-5 h-5 text-gray-600" />
                 </button>
-                <h1 className="text-2xl font-bold text-gray-900">Create New Event</h1>
+                <h1 className="text-2xl font-bold text-gray-900">Edit Event</h1>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6 bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
@@ -66,7 +109,7 @@ const CreateEvent = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                         <label className="block text-sm font-bold text-gray-700 flex items-center gap-2">
-                            <Calendar className="w-4 h-4 text-blue-500" /> Event Date & Time
+                            <Calendar className="w-4 h-4 text-blue-500" /> Date & Time
                         </label>
                         <input
                             type="datetime-local"
@@ -92,7 +135,7 @@ const CreateEvent = () => {
                     </div>
                 </div>
 
-                {/* New Limit Fields */}
+                {/* Limit Fields */}
                 <div className="p-6 bg-blue-50/50 rounded-2xl space-y-6 border border-blue-100">
                     <h3 className="text-sm font-bold text-blue-900 uppercase tracking-wider flex items-center gap-2">
                         Registration Limits <span className="text-[10px] font-normal text-blue-500 normal-case">(Optional)</span>
@@ -127,7 +170,27 @@ const CreateEvent = () => {
                     </div>
                 </div>
 
+                <div className="p-4 bg-gray-50 rounded-xl space-y-3">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            {formData.is_hidden ? <EyeOff className="w-5 h-5 text-gray-500" /> : <Eye className="w-5 h-5 text-green-600" />}
+                            <div>
+                                <p className="text-sm font-bold text-gray-900">Visibility</p>
+                                <p className="text-xs text-gray-500">{formData.is_hidden ? 'This event is hidden from the public' : 'This event is visible to everyone'}</p>
+                            </div>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => setFormData({ ...formData, is_hidden: !formData.is_hidden })}
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ring-2 ring-offset-2 ring-transparent ${formData.is_hidden ? 'bg-gray-300' : 'bg-blue-600'}`}
+                        >
+                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${formData.is_hidden ? 'translate-x-1' : 'translate-x-6'}`} />
+                        </button>
+                    </div>
+                </div>
+
                 <ImageUpload
+                    initialImage={formData.cover_image_url}
                     onImageUpload={(url) => setFormData({ ...formData, cover_image_url: url })}
                 />
 
@@ -143,14 +206,21 @@ const CreateEvent = () => {
                     />
                 </div>
 
-                <div className="flex justify-end pt-4">
+                <div className="flex justify-end pt-4 border-t gap-3">
+                    <button
+                        type="button"
+                        onClick={() => navigate('/dashboard/events')}
+                        className="px-6 py-2.5 rounded-xl font-bold text-gray-600 hover:bg-gray-100 transition-colors"
+                    >
+                        Cancel
+                    </button>
                     <button
                         type="submit"
-                        disabled={loading}
-                        className="flex items-center gap-2 bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 disabled:opacity-70 disabled:scale-95"
+                        disabled={saving}
+                        className="flex items-center gap-2 bg-blue-600 text-white px-8 py-2.5 rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 disabled:opacity-70 disabled:scale-95"
                     >
-                        {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
-                        Create Event
+                        {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+                        Save Changes
                     </button>
                 </div>
             </form>
@@ -158,4 +228,4 @@ const CreateEvent = () => {
     );
 };
 
-export default CreateEvent;
+export default EditEvent;

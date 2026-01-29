@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import eventService from '../services/eventService';
-import { Calendar, MapPin, ArrowLeft, Loader2 } from 'lucide-react';
+import { Calendar, MapPin, ArrowLeft, Loader2, Clock, Users } from 'lucide-react';
 import EventRegistrationForm from '../components/EventRegistrationForm';
 
 const EventDetail = () => {
@@ -45,6 +45,8 @@ const EventDetail = () => {
     }
 
     const eventDate = new Date(event.date);
+    const deadline = event.registration_deadline ? new Date(event.registration_deadline) : null;
+    const isDeadlinePassed = deadline && new Date() > deadline;
 
     return (
         <div className="max-w-6xl mx-auto px-4 py-8">
@@ -67,33 +69,68 @@ const EventDetail = () => {
                         />
                     </div>
 
-                    <div className="space-y-4">
+                    <div className="space-y-6">
                         <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight sm:text-5xl">
                             {event.title}
                         </h1>
 
-                        <div className="flex flex-wrap gap-6 text-gray-600 font-medium">
-                            <div className="flex items-center gap-2">
-                                <Calendar className="w-5 h-5 text-blue-600" />
-                                <span>{eventDate.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                        <div className="flex flex-wrap gap-8 text-gray-600 font-medium">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
+                                    <Calendar className="w-5 h-5" />
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-xs text-gray-400 uppercase font-bold tracking-wider">Date & Time</span>
+                                    <span>{eventDate.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                                </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <MapPin className="w-5 h-5 text-blue-600" />
-                                <span>{event.location}</span>
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-red-50 text-red-600 rounded-xl flex items-center justify-center">
+                                    <MapPin className="w-5 h-5" />
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-xs text-gray-400 uppercase font-bold tracking-wider">Location</span>
+                                    <span>{event.location}</span>
+                                </div>
                             </div>
+                            {event.max_participants && (
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center">
+                                        <Users className="w-5 h-5" />
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="text-xs text-gray-400 uppercase font-bold tracking-wider">Capacity</span>
+                                        <span>Max {event.max_participants} people</span>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
 
-                    <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed">
-                        <h2 className="text-2xl font-bold text-gray-900 mb-4 border-b pb-2">About the Event</h2>
+                    <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
+                        <h2 className="text-2xl font-bold text-gray-900 mb-6 border-b border-gray-50 pb-4">Event Description</h2>
                         <p className="whitespace-pre-line">{event.description}</p>
                     </div>
                 </div>
 
                 {/* Right side: Form */}
                 <div className="lg:col-span-1">
-                    <div className="sticky top-24">
-                        <EventRegistrationForm eventId={event.id} eventTitle={event.title} />
+                    <div className="sticky top-24 space-y-6">
+                        {deadline && (
+                            <div className={`p-4 rounded-2xl border flex items-center gap-3 ${isDeadlinePassed ? 'bg-red-50 border-red-100 text-red-700' : 'bg-amber-50 border-amber-100 text-amber-700'}`}>
+                                <Clock className="w-5 h-5" />
+                                <div className="text-sm">
+                                    <p className="font-bold">Registration Deadline</p>
+                                    <p>{deadline.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}</p>
+                                </div>
+                            </div>
+                        )}
+
+                        <EventRegistrationForm
+                            eventId={event.id}
+                            eventTitle={event.title}
+                            isDisabled={isDeadlinePassed}
+                        />
                     </div>
                 </div>
             </div>

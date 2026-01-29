@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { User, Mail, Phone, School, CheckCircle, Loader2 } from 'lucide-react';
+import { User, Mail, Phone, School, CheckCircle, Loader2, AlertCircle } from 'lucide-react';
 import registrationService from '../services/registrationService';
 
-const EventRegistrationForm = ({ eventId, eventTitle }) => {
+const EventRegistrationForm = ({ eventId, eventTitle, isDisabled }) => {
     const [formData, setFormData] = useState({
         full_name: '',
         email: '',
@@ -24,6 +24,8 @@ const EventRegistrationForm = ({ eventId, eventTitle }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (isDisabled) return;
+
         setLoading(true);
         setError('');
 
@@ -40,35 +42,48 @@ const EventRegistrationForm = ({ eventId, eventTitle }) => {
         }
     };
 
+    if (isDisabled) {
+        return (
+            <div className="bg-gray-50 border border-gray-200 p-8 rounded-2xl text-center space-y-4">
+                <div className="w-16 h-16 bg-gray-100 text-gray-400 rounded-full flex items-center justify-center mx-auto">
+                    <AlertCircle className="w-10 h-10" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">Registration Closed</h3>
+                <p className="text-gray-500 text-sm">
+                    The deadline for this event has passed. We hope to see you at our next event!
+                </p>
+            </div>
+        );
+    }
+
     if (success) {
         return (
-            <div className="bg-green-50 border border-green-100 p-8 rounded-2xl text-center space-y-4">
+            <div className="bg-green-50 border border-green-100 p-8 rounded-2xl text-center space-y-4 shadow-lg shadow-green-100/50">
                 <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto">
                     <CheckCircle className="w-10 h-10" />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900">Registration Successful!</h3>
                 <p className="text-gray-600">
-                    Thank you, <span className="font-semibold">{formData.full_name}</span>. You have successfully registered for <span className="font-semibold">{eventTitle}</span>.
+                    Thank you, <span className="font-semibold">{formData.full_name}</span>. You're all set for <span className="font-semibold">{eventTitle}</span>.
                 </p>
-                <p className="text-sm text-gray-500">We've sent a confirmation details to your email or we will contact you soon.</p>
             </div>
         );
     }
 
     return (
         <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
-            <h3 className="text-2xl font-bold text-gray-900 mb-6">Join this Event</h3>
+            <h3 className="text-2xl font-bold text-gray-900 mb-6 tracking-tight">Register for Event</h3>
 
             <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-700 block">Full Name *</label>
+                    <label className="text-sm font-bold text-gray-700 block">Full Name *</label>
                     <div className="relative">
                         <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                         <input
                             name="full_name"
                             type="text"
                             required
-                            placeholder="John Doe"
+                            placeholder="Your Name"
                             className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 outline-none transition-all"
                             value={formData.full_name}
                             onChange={handleChange}
@@ -76,24 +91,25 @@ const EventRegistrationForm = ({ eventId, eventTitle }) => {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div className="space-y-2">
-                        <label className="text-sm font-semibold text-gray-700 block">Email Address *</label>
-                        <div className="relative">
-                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                            <input
-                                name="email"
-                                type="email"
-                                required
-                                placeholder="john@example.com"
-                                className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 outline-none transition-all"
-                                value={formData.email}
-                                onChange={handleChange}
-                            />
-                        </div>
+                <div className="space-y-2">
+                    <label className="text-sm font-bold text-gray-700 block">Email Address *</label>
+                    <div className="relative">
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                        <input
+                            name="email"
+                            type="email"
+                            required
+                            placeholder="email@example.com"
+                            className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 outline-none transition-all"
+                            value={formData.email}
+                            onChange={handleChange}
+                        />
                     </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-5">
                     <div className="space-y-2">
-                        <label className="text-sm font-semibold text-gray-700 block">Phone Number</label>
+                        <label className="text-sm font-bold text-gray-700 block">Phone Number</label>
                         <div className="relative">
                             <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                             <input
@@ -106,20 +122,19 @@ const EventRegistrationForm = ({ eventId, eventTitle }) => {
                             />
                         </div>
                     </div>
-                </div>
-
-                <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-700 block">School / University</label>
-                    <div className="relative">
-                        <School className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                        <input
-                            name="school_name"
-                            type="text"
-                            placeholder="Your School Name"
-                            className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 outline-none transition-all"
-                            value={formData.school_name}
-                            onChange={handleChange}
-                        />
+                    <div className="space-y-2">
+                        <label className="text-sm font-bold text-gray-700 block">School / University</label>
+                        <div className="relative">
+                            <School className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            <input
+                                name="school_name"
+                                type="text"
+                                placeholder="Your University"
+                                className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 outline-none transition-all"
+                                value={formData.school_name}
+                                onChange={handleChange}
+                            />
+                        </div>
                     </div>
                 </div>
 
@@ -129,17 +144,18 @@ const EventRegistrationForm = ({ eventId, eventTitle }) => {
                         type="checkbox"
                         required
                         id="terms"
-                        className="mt-1 w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer"
+                        className="mt-1 w-5 h-5 text-blue-600 rounded-lg border-gray-300 focus:ring-blue-500 cursor-pointer"
                         checked={formData.agreed_to_policies}
                         onChange={handleChange}
                     />
-                    <label htmlFor="terms" className="text-sm text-gray-600 leading-relaxed cursor-pointer">
-                        I agree to the <span className="text-blue-600 font-medium hover:underline">event terms and policies</span>. I understand my data will be used for event organization purposes.
+                    <label htmlFor="terms" className="text-sm text-gray-600 leading-relaxed cursor-pointer select-none">
+                        I agree to the <span className="text-blue-600 font-bold hover:underline">policies</span>.
                     </label>
                 </div>
 
                 {error && (
-                    <div className="text-red-500 text-sm font-medium bg-red-50 p-3 rounded-lg border border-red-100">
+                    <div className="text-red-500 text-sm font-bold bg-red-50 p-4 rounded-xl border border-red-100 flex gap-2">
+                        <AlertCircle className="w-5 h-5 shrink-0" />
                         {error}
                     </div>
                 )}
@@ -147,14 +163,12 @@ const EventRegistrationForm = ({ eventId, eventTitle }) => {
                 <button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-200 transition-all flex items-center justify-center gap-2 group disabled:opacity-70 disabled:cursor-not-allowed"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-xl shadow-blue-200 transition-all flex items-center justify-center gap-2 disabled:opacity-70"
                 >
                     {loading ? (
                         <Loader2 className="w-6 h-6 animate-spin" />
                     ) : (
-                        <>
-                            Confirm Registration
-                        </>
+                        "Confirm Registration"
                     )}
                 </button>
             </form>

@@ -16,7 +16,16 @@ const findByEvent = async (event_id) => {
     return result.rows;
 };
 
+const countByEvent = async (event_id) => {
+    const result = await db.query(
+        'SELECT COUNT(*) FROM event_registrations WHERE event_id = $1',
+        [event_id]
+    );
+    return parseInt(result.rows[0].count);
+};
+
 module.exports = {
     create,
-    findByEvent
+    findByEvent,
+    countByEvent
 };

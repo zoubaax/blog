@@ -3,7 +3,9 @@ const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 
 const getAll = catchAsync(async (req, res) => {
-    const events = await eventService.getAllEvents();
+    // Check if user is admin to see hidden events
+    const isAdmin = req.user && req.user.role === 'admin';
+    const events = await eventService.getAllEvents(isAdmin);
     res.status(200).json({ success: true, count: events.length, data: events });
 });
 
