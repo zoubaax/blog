@@ -25,8 +25,15 @@ const create = async (title, content, imageUrl, authorId) => {
 };
 
 const update = async (id, title, content, imageUrl) => {
+    // We use COALESCE for imageUrl to keep existing if null is passed
+    // but title and content are usually required in the form
     const result = await db.query(
-        'UPDATE articles SET title = $1, content = $2, image_url = COALESCE($3, image_url), updated_at = CURRENT_TIMESTAMP WHERE id = $4 RETURNING *',
+        `UPDATE articles 
+         SET title = $1, 
+             content = $2, 
+             image_url = COALESCE($3, image_url), 
+             updated_at = CURRENT_TIMESTAMP 
+         WHERE id = $4 RETURNING *`,
         [title, content, imageUrl, id]
     );
     return result.rows[0];

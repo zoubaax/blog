@@ -15,17 +15,22 @@ const getArticleById = async (id) => {
 
 const createArticle = async (data, authorId) => {
     const { title, content, image_url } = data;
-    return await articleModel.create(title, content, image_url, authorId);
+    if (!title || !content) {
+        throw new AppError('Title and content are required', 400);
+    }
+    return await articleModel.create(title, content, image_url || null, authorId);
 };
 
 const updateArticle = async (id, data) => {
-    // Check existence first
     const existing = await articleModel.findById(id);
     if (!existing) {
         throw new AppError('Article not found', 404);
     }
 
-    const { title, content, image_url } = data;
+    const title = data.title !== undefined ? data.title : existing.title;
+    const content = data.content !== undefined ? data.content : existing.content;
+    const image_url = data.image_url !== undefined ? data.image_url : existing.image_url;
+
     return await articleModel.update(id, title, content, image_url);
 };
 

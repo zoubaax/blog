@@ -8,6 +8,7 @@ import Login from './pages/Login';
 import DashboardHome from './pages/admin/DashboardHome';
 import AdminArticles from './pages/admin/AdminArticles';
 import CreateArticle from './pages/admin/CreateArticle';
+import EditArticle from './pages/admin/EditArticle';
 import AdminEvents from './pages/admin/AdminEvents';
 import CreateEvent from './pages/admin/CreateEvent';
 import EditEvent from './pages/admin/EditEvent';
@@ -15,6 +16,7 @@ import AdminEventRegistrations from './pages/admin/AdminEventRegistrations';
 import AdminTeam from './pages/admin/AdminTeam';
 import CreateTeam from './pages/admin/CreateTeam';
 import Articles from './pages/Articles';
+import ArticleDetail from './pages/ArticleDetail';
 import Events from './pages/Events';
 import EventDetail from './pages/EventDetail';
 import Team from './pages/Team';
@@ -27,6 +29,7 @@ function App() {
         <Route path="/" element={<MainLayout />}>
           <Route index element={<Home />} />
           <Route path="articles" element={<Articles />} />
+          <Route path="articles/:id" element={<ArticleDetail />} />
           <Route path="events" element={<Events />} />
           <Route path="events/:id" element={<EventDetail />} />
           <Route path="team" element={<Team />} />
@@ -40,6 +43,7 @@ function App() {
 
             <Route path="articles" element={<AdminArticles />} />
             <Route path="articles/new" element={<CreateArticle />} />
+            <Route path="articles/edit/:id" element={<EditArticle />} />
 
             <Route path="events" element={<AdminEvents />} />
             <Route path="events/new" element={<CreateEvent />} />
