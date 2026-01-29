@@ -2,163 +2,273 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import articleService from '../../services/articleService';
 import ImageUpload from '../../components/ImageUpload';
-import { Save, ArrowLeft, Loader2, FileText, Layout, Eye } from 'lucide-react';
+import { 
+  Save, 
+  ArrowLeft, 
+  Loader2, 
+  Eye, 
+  Upload,
+  Type,
+  FileText,
+  AlertCircle
+} from 'lucide-react';
 
 const EditArticle = () => {
-    const { id } = useParams();
-    const navigate = useNavigate();
-    const [formData, setFormData] = useState({
-        title: '',
-        content: '',
-        image_url: ''
-    });
-    const [loading, setLoading] = useState(true);
-    const [saving, setSaving] = useState(false);
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    title: '',
+    content: '',
+    image_url: ''
+  });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [errors, setErrors] = useState({});
 
-    useEffect(() => {
-        const fetchArticle = async () => {
-            try {
-                const res = await articleService.getById(id);
-                const article = res.data;
-                setFormData({
-                    title: article.title || '',
-                    content: article.content || '',
-                    image_url: article.image_url || ''
-                });
-            } catch (error) {
-                console.error('Error fetching article:', error);
-                alert('Failed to fetch article data');
-                navigate('/dashboard/articles');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchArticle();
-    }, [id, navigate]);
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setSaving(true);
-
-        try {
-            await articleService.update(id, formData);
-            navigate('/dashboard/articles');
-        } catch (error) {
-            console.error('Update Error:', error);
-            alert('Failed to update article');
-        } finally {
-            setSaving(false);
-        }
+  useEffect(() => {
+    const fetchArticle = async () => {
+      try {
+        const res = await articleService.getById(id);
+        const article = res.data;
+        setFormData({
+          title: article.title || '',
+          content: article.content || '',
+          image_url: article.image_url || ''
+        });
+      } catch (error) {
+        console.error('Error fetching article:', error);
+        alert('Failed to fetch article data');
+        navigate('/dashboard/articles');
+      } finally {
+        setLoading(false);
+      }
     };
 
-    if (loading) return (
-        <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
-            <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
-            <p className="text-gray-500 font-medium text-lg">Loading article content...</p>
-        </div>
-    );
+    fetchArticle();
+  }, [id, navigate]);
 
+  const validateForm = () => {
+    const newErrors = {};
+    if (!formData.title.trim()) newErrors.title = 'Title is required';
+    if (!formData.content.trim()) newErrors.content = 'Content is required';
+    if (formData.content.length < 100) newErrors.content = 'Content should be at least 100 characters';
+    return newErrors;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const validationErrors = validateForm();
+    
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
+    setSaving(true);
+    setErrors({});
+
+    try {
+      await articleService.update(id, formData);
+      navigate('/dashboard/articles');
+    } catch (error) {
+      console.error('Update Error:', error);
+      alert('Failed to update article');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
     return (
-        <div className="max-w-3xl mx-auto space-y-6 pb-20 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="flex items-center justify-between gap-4 mb-2">
-                <div className="flex items-center gap-4">
-                    <button
-                        onClick={() => navigate('/dashboard/articles')}
-                        className="p-2 hover:bg-gray-100 rounded-full transition-colors group"
-                    >
-                        <ArrowLeft className="w-5 h-5 text-gray-600 group-hover:-translate-x-1 transition-transform" />
-                    </button>
-                    <div>
-                        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Edit Article</h1>
-                        <p className="text-sm text-gray-500">Updating your published thoughts</p>
-                    </div>
+      <div className="flex items-center justify-center min-h-[500px]">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-4" />
+          <p className="text-gray-600 font-medium">Loading article...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto space-y-8 pb-12">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => navigate('/dashboard/articles')}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-3 py-2 rounded-lg transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span className="font-medium">Back to Articles</span>
+          </button>
+        </div>
+        
+        <div className="flex items-center gap-3">
+          <a
+            href={`/articles/${id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 text-blue-600 hover:text-blue-700 px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors font-medium"
+          >
+            <Eye className="w-4 h-4" />
+            Preview Article
+          </a>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Edit Article</h1>
+          <p className="text-gray-500 mt-2">Update your article content and details</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-8">
+          {/* Featured Image Section */}
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Upload className="w-5 h-5 text-gray-700" />
+              <h2 className="text-lg font-semibold text-gray-900">Featured Image</h2>
+            </div>
+            <ImageUpload
+              initialImage={formData.image_url}
+              onImageUpload={(url) => setFormData(p => ({ ...p, image_url: url }))}
+            />
+            <p className="text-sm text-gray-500 mt-4">
+              Add a compelling image to attract readers. Recommended size: 1200×630px
+            </p>
+          </div>
+
+          {/* Article Details */}
+          <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-6">
+            {/* Title Field */}
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                <Type className="w-4 h-4" />
+                Article Title
+              </label>
+              <input
+                type="text"
+                required
+                className={`w-full px-4 py-3 rounded-lg border ${errors.title ? 'border-red-300' : 'border-gray-300'} focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                placeholder="Enter article title..."
+                value={formData.title}
+                onChange={(e) => {
+                  setFormData(p => ({ ...p, title: e.target.value }));
+                  if (errors.title) setErrors({ ...errors, title: '' });
+                }}
+              />
+              {errors.title && (
+                <div className="flex items-center gap-1 text-sm text-red-600">
+                  <AlertCircle className="w-4 h-4" />
+                  {errors.title}
                 </div>
-                <a
-                    href={`/articles/${id}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-sm font-bold text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-xl transition-all"
-                >
-                    <Eye className="w-4 h-4" /> Preview
-                </a>
+              )}
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-8 bg-white p-8 sm:p-10 rounded-[40px] shadow-xl border border-gray-100 relative overflow-hidden">
-                {/* Visual Accent */}
-                <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-500"></div>
-
-                <div className="space-y-6">
-                    {/* Image Section */}
-                    <div className="space-y-4">
-                        <div className="flex items-center gap-2 text-sm font-bold text-gray-400 uppercase tracking-widest pl-1">
-                            <Layout className="w-4 h-4" /> Featured Image
-                        </div>
-                        <ImageUpload
-                            initialImage={formData.image_url}
-                            onImageUpload={(url) => setFormData(p => ({ ...p, image_url: url }))}
-                        />
-                    </div>
-
-                    {/* Title Section */}
-                    <div className="space-y-2">
-                        <label className="block text-sm font-bold text-gray-700 pl-1">Article Title</label>
-                        <input
-                            type="text"
-                            required
-                            className="w-full px-6 py-4 rounded-2xl border border-gray-200 focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all text-xl font-bold placeholder:text-gray-300"
-                            placeholder="Hook your readers with a great title..."
-                            value={formData.title}
-                            onChange={(e) => setFormData(p => ({ ...p, title: e.target.value }))}
-                        />
-                    </div>
-
-                    {/* Content Section */}
-                    <div className="space-y-2">
-                        <div className="flex items-center justify-between pl-1">
-                            <label className="block text-sm font-bold text-gray-700">Content</label>
-                            <span className="text-xs text-gray-400 font-medium">Character Count: {formData.content.length}</span>
-                        </div>
-                        <textarea
-                            required
-                            rows="15"
-                            className="w-full px-6 py-5 rounded-2xl border border-gray-200 focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all resize-none text-gray-700 leading-relaxed placeholder:text-gray-300"
-                            placeholder="Write your story here... use markdown for better formatting."
-                            value={formData.content}
-                            onChange={(e) => setFormData(p => ({ ...p, content: e.target.value }))}
-                        />
-                    </div>
+            {/* Content Field */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                  <FileText className="w-4 h-4" />
+                  Article Content
+                </label>
+                <div className="text-sm text-gray-500">
+                  {formData.content.length} characters • {Math.ceil(formData.content.length / 5)} words
                 </div>
-
-                <div className="flex flex-col sm:flex-row justify-end pt-8 border-t border-gray-50 gap-4">
-                    <button
-                        type="button"
-                        onClick={() => navigate('/dashboard/articles')}
-                        className="px-8 py-4 rounded-2xl font-bold text-gray-500 hover:bg-gray-100 transition-all active:scale-95"
-                    >
-                        Discard Changes
-                    </button>
-                    <button
-                        type="submit"
-                        disabled={saving}
-                        className="flex items-center justify-center gap-3 bg-blue-600 text-white px-12 py-4 rounded-2xl font-bold hover:bg-blue-700 transition-all shadow-xl shadow-blue-100 disabled:opacity-70 disabled:scale-[0.98]"
-                    >
-                        {saving ? (
-                            <>
-                                <Loader2 className="w-5 h-5 animate-spin" />
-                                <span>Saving...</span>
-                            </>
-                        ) : (
-                            <>
-                                <Save className="w-5 h-5" />
-                                <span>Update Article</span>
-                            </>
-                        )}
-                    </button>
+              </div>
+              <textarea
+                required
+                rows="18"
+                className={`w-full px-4 py-3 rounded-lg border ${errors.content ? 'border-red-300' : 'border-gray-300'} focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y font-mono text-sm`}
+                placeholder="Write your article content here... Markdown is supported."
+                value={formData.content}
+                onChange={(e) => {
+                  setFormData(p => ({ ...p, content: e.target.value }));
+                  if (errors.content) setErrors({ ...errors, content: '' });
+                }}
+              />
+              {errors.content && (
+                <div className="flex items-center gap-1 text-sm text-red-600">
+                  <AlertCircle className="w-4 h-4" />
+                  {errors.content}
                 </div>
-            </form>
+              )}
+              <div className="flex items-center gap-4 text-sm text-gray-500">
+                <span>✨ Markdown supported</span>
+                <span>•</span>
+                <span>📝 Autosave enabled</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row justify-between gap-4 pt-6 border-t border-gray-200">
+            <button
+              type="button"
+              onClick={() => navigate('/dashboard/articles')}
+              className="px-6 py-3 text-gray-700 hover:bg-gray-100 font-medium rounded-lg transition-colors"
+            >
+              Cancel
+            </button>
+            
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                type="button"
+                onClick={() => window.location.reload()}
+                className="px-6 py-3 border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium rounded-lg transition-colors"
+              >
+                Reset Changes
+              </button>
+              
+              <button
+                type="submit"
+                disabled={saving}
+                className="flex items-center justify-center gap-2 bg-blue-600 text-white px-8 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+              >
+                {saving ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4" />
+                    Update Article
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </form>
+
+        {/* Quick Stats */}
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
+          <h3 className="font-semibold text-gray-900 mb-4">Article Status</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="bg-white rounded-lg p-4 border border-gray-200">
+              <div className="text-sm text-gray-600 mb-1">Word Count</div>
+              <div className="text-2xl font-bold text-gray-900">
+                {Math.ceil(formData.content.length / 5)}
+              </div>
+            </div>
+            <div className="bg-white rounded-lg p-4 border border-gray-200">
+              <div className="text-sm text-gray-600 mb-1">Reading Time</div>
+              <div className="text-2xl font-bold text-gray-900">
+                ~{Math.ceil(formData.content.length / 5 / 200)} min
+              </div>
+            </div>
+            <div className="bg-white rounded-lg p-4 border border-gray-200">
+              <div className="text-sm text-gray-600 mb-1">Image Status</div>
+              <div className="text-2xl font-bold text-gray-900">
+                {formData.image_url ? '✅ Set' : '⚠️ Missing'}
+              </div>
+            </div>
+          </div>
         </div>
-    );
+      </div>
+    </div>
+  );
 };
 
 export default EditArticle;

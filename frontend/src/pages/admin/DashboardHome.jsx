@@ -4,175 +4,234 @@ import articleService from '../../services/articleService';
 import eventService from '../../services/eventService';
 import teamService from '../../services/teamService';
 import {
-    ToggleRight,
-    ToggleLeft,
-    Users,
-    Loader2,
-    FileText,
-    Calendar,
-    ClipboardList,
-    TrendingUp,
-    Activity,
-    CheckCircle
+  ToggleRight,
+  ToggleLeft,
+  Users,
+  Loader2,
+  FileText,
+  Calendar,
+  ClipboardList,
+  TrendingUp,
+  Activity,
+  CheckCircle,
+  Shield,
+  Database,
+  Cloud
 } from 'lucide-react';
 
 const DashboardHome = () => {
-    const [stats, setStats] = useState({
-        articles: 0,
-        events: 0,
-        team: 0,
-        applications: 0
-    });
-    const [joinEnabled, setJoinEnabled] = useState(false);
-    const [loading, setLoading] = useState(true);
-    const [toggling, setToggling] = useState(false);
+  const [stats, setStats] = useState({
+    articles: 0,
+    events: 0,
+    team: 0,
+    applications: 0
+  });
+  const [joinEnabled, setJoinEnabled] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [toggling, setToggling] = useState(false);
 
-    useEffect(() => {
-        const loadDashboardData = async () => {
-            try {
-                const [statusRes, articlesRes, eventsRes, teamRes, appsRes] = await Promise.all([
-                    settingsService.getJoinStatus(),
-                    articleService.getAll(),
-                    eventService.getAll(true), // isAdmin = true to get all
-                    teamService.getAll(),
-                    settingsService.getApplications()
-                ]);
+  useEffect(() => {
+    const loadDashboardData = async () => {
+      try {
+        const [statusRes, articlesRes, eventsRes, teamRes, appsRes] = await Promise.all([
+          settingsService.getJoinStatus(),
+          articleService.getAll(),
+          eventService.getAll(true),
+          teamService.getAll(),
+          settingsService.getApplications()
+        ]);
 
-                setJoinEnabled(statusRes.enabled);
-                setStats({
-                    articles: articlesRes.data?.length || 0,
-                    events: eventsRes.data?.length || 0,
-                    team: teamRes.data?.length || 0,
-                    applications: appsRes.data?.length || 0
-                });
-            } catch (err) {
-                console.error('Failed to load dashboard data:', err);
-            } finally {
-                setLoading(false);
-            }
-        };
-        loadDashboardData();
-    }, []);
-
-    const handleToggle = async () => {
-        setToggling(true);
-        try {
-            const newVal = !joinEnabled;
-            await settingsService.toggleJoinForm(newVal);
-            setJoinEnabled(newVal);
-        } catch (err) {
-            alert('Failed to update form status');
-        } finally {
-            setToggling(false);
-        }
+        setJoinEnabled(statusRes.enabled);
+        setStats({
+          articles: articlesRes.data?.length || 0,
+          events: eventsRes.data?.length || 0,
+          team: teamRes.data?.length || 0,
+          applications: appsRes.data?.length || 0
+        });
+      } catch (err) {
+        console.error('Failed to load dashboard data:', err);
+      } finally {
+        setLoading(false);
+      }
     };
+    loadDashboardData();
+  }, []);
 
-    if (loading) return (
-        <div className="flex items-center justify-center min-h-[400px]">
-            <Loader2 className="w-10 h-10 text-blue-700 animate-spin" />
-        </div>
-    );
+  const handleToggle = async () => {
+    setToggling(true);
+    try {
+      const newVal = !joinEnabled;
+      await settingsService.toggleJoinForm(newVal);
+      setJoinEnabled(newVal);
+    } catch (err) {
+      alert('Failed to update form status');
+    } finally {
+      setToggling(false);
+    }
+  };
 
-    const statCards = [
-        { label: 'Total Articles', value: stats.articles, icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50' },
-        { label: 'Total Events', value: stats.events, icon: Calendar, color: 'text-purple-600', bg: 'bg-purple-50' },
-        { label: 'Club Members', value: stats.team, icon: Users, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-        { label: 'Join Applications', value: stats.applications, icon: ClipboardList, color: 'text-amber-600', bg: 'bg-amber-50' },
-    ];
-
+  if (loading) {
     return (
-        <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                    <h1 className="text-3xl font-black text-slate-900 tracking-tight">System Statistics</h1>
-                    <p className="text-slate-500 font-medium mt-1 uppercase text-xs tracking-[0.2em]">Live performance and activity overview</p>
-                </div>
-
-                {/* RECRUITMENT TOGGLE */}
-                <div className={`flex items-center gap-4 p-2 pl-6 rounded-2xl border-2 transition-all shadow-sm ${joinEnabled ? 'bg-blue-50 border-blue-200' : 'bg-slate-50 border-slate-200'}`}>
-                    <div className="flex flex-col">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 leading-none mb-1">Recruitment Mode</span>
-                        <span className={`text-sm font-black uppercase ${joinEnabled ? 'text-blue-700' : 'text-slate-500'}`}>
-                            {joinEnabled ? 'Currently Active' : 'Form is Closed'}
-                        </span>
-                    </div>
-                    <button
-                        onClick={handleToggle}
-                        disabled={toggling}
-                        className={`p-2 rounded-xl transition-all ${joinEnabled ? 'text-blue-600 hover:bg-blue-100' : 'text-slate-400 hover:bg-slate-200'}`}
-                    >
-                        {toggling ? <Loader2 className="w-8 h-8 animate-spin" /> : (
-                            joinEnabled ? <ToggleRight className="w-10 h-10" /> : <ToggleLeft className="w-10 h-10" />
-                        )}
-                    </button>
-                </div>
-            </div>
-
-            {/* STATS GRID */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {statCards.map((card, i) => (
-                    <div key={i} className="bg-white p-8 rounded-[40px] shadow-sm border border-slate-100 hover:shadow-xl hover:border-blue-100 transition-all group overflow-hidden relative">
-                        <div className={`absolute top-0 right-0 w-32 h-32 ${card.bg} rounded-full -mr-16 -mt-16 opacity-20 group-hover:scale-150 transition-transform duration-700`}></div>
-                        <div className="relative space-y-4">
-                            <div className={`w-14 h-14 ${card.bg} ${card.color} rounded-2xl flex items-center justify-center`}>
-                                <card.icon className="w-7 h-7" />
-                            </div>
-                            <div>
-                                <h3 className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">{card.label}</h3>
-                                <p className="text-4xl font-black text-slate-900 mt-1">{card.value}</p>
-                            </div>
-                            <div className="flex items-center gap-1 text-[10px] font-black text-emerald-500 uppercase tracking-widest">
-                                <TrendingUp className="w-3 h-3" /> Live Update
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
-
-            {/* SYSTEM HEALTH / RECENT ACTIVITY PLACEHOLDERS */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-2 bg-slate-900 rounded-[40px] p-10 text-white relative overflow-hidden group">
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-transparent"></div>
-                    <div className="relative space-y-8">
-                        <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md">
-                                <Activity className="w-6 h-6 text-blue-400" />
-                            </div>
-                            <h3 className="text-2xl font-black tracking-tight uppercase">Platform Health</h3>
-                        </div>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-8">
-                            <div className="space-y-1">
-                                <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Database</p>
-                                <p className="text-xl font-black flex items-center gap-2">Connected <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span></p>
-                            </div>
-                            <div className="space-y-1">
-                                <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">API Status</p>
-                                <p className="text-xl font-black flex items-center gap-2">Online <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span></p>
-                            </div>
-                            <div className="space-y-1">
-                                <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Storage</p>
-                                <p className="text-xl font-black">Cloudinary OK</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="bg-blue-600 rounded-[40px] p-10 text-white flex flex-col justify-between group overflow-hidden relative">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl group-hover:bg-white/20 transition-all duration-700"></div>
-                    <div className="relative">
-                        <CheckCircle className="w-12 h-12 mb-6 text-blue-200" />
-                        <h3 className="text-2xl font-black leading-tight uppercase">Admin<br />Quick Tips</h3>
-                        <p className="text-blue-100 text-sm mt-4 font-medium leading-relaxed">
-                            Use the sidebar to manage all content. Remember to update event statuses regularly for your members.
-                        </p>
-                    </div>
-                    <button className="relative mt-8 py-3 bg-white text-blue-700 font-black rounded-2xl uppercase text-[10px] tracking-widest hover:bg-blue-50 transition-all shadow-xl shadow-blue-900/20">
-                        View Documentation
-                    </button>
-                </div>
-            </div>
+      <div className="flex items-center justify-center min-h-[500px]">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-4" />
+          <p className="text-gray-600 font-medium">Loading dashboard...</p>
         </div>
+      </div>
     );
+  }
+
+  const statCards = [
+    { 
+      label: 'Articles', 
+      value: stats.articles, 
+      icon: FileText, 
+      color: 'text-blue-600', 
+      bg: 'bg-blue-50',
+      gradient: 'from-blue-50 to-blue-100'
+    },
+    { 
+      label: 'Events', 
+      value: stats.events, 
+      icon: Calendar, 
+      color: 'text-purple-600', 
+      bg: 'bg-purple-50',
+      gradient: 'from-purple-50 to-purple-100'
+    },
+    { 
+      label: 'Team Members', 
+      value: stats.team, 
+      icon: Users, 
+      color: 'text-emerald-600', 
+      bg: 'bg-emerald-50',
+      gradient: 'from-emerald-50 to-emerald-100'
+    },
+    { 
+      label: 'Applications', 
+      value: stats.applications, 
+      icon: ClipboardList, 
+      color: 'text-amber-600', 
+      bg: 'bg-amber-50',
+      gradient: 'from-amber-50 to-amber-100'
+    },
+  ];
+
+  const systemHealth = [
+    { label: 'Database', status: 'Connected', icon: Database, color: 'text-emerald-500' },
+    { label: 'API Status', status: 'Online', icon: Activity, color: 'text-emerald-500' },
+    { label: 'Cloud Storage', status: 'Active', icon: Cloud, color: 'text-emerald-500' },
+  ];
+
+  return (
+    <div className="space-y-8 animate-in fade-in duration-500">
+      {/* Header Section */}
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">Dashboard Overview</h1>
+          <p className="text-gray-500 mt-2">Welcome back! Here's what's happening with your club.</p>
+        </div>
+
+        {/* Recruitment Toggle */}
+        <div className={`inline-flex items-center gap-4 px-6 py-4 rounded-2xl border transition-all ${joinEnabled ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-200'}`}>
+          <div>
+            <p className="text-sm font-medium text-gray-600">Recruitment Status</p>
+            <p className={`text-lg font-semibold ${joinEnabled ? 'text-blue-700' : 'text-gray-700'}`}>
+              {joinEnabled ? 'Open' : 'Closed'}
+            </p>
+          </div>
+          <button
+            onClick={handleToggle}
+            disabled={toggling}
+            className={`relative inline-flex h-8 w-16 items-center rounded-full transition-colors ${joinEnabled ? 'bg-blue-600' : 'bg-gray-300'}`}
+          >
+            {toggling ? (
+              <Loader2 className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-5 h-5 text-white animate-spin" />
+            ) : (
+              <span className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${joinEnabled ? 'translate-x-9' : 'translate-x-1'}`} />
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        {statCards.map((card, index) => (
+          <div 
+            key={index} 
+            className={`bg-gradient-to-br ${card.gradient} p-6 rounded-2xl border border-gray-100 hover:shadow-lg transition-all duration-300 hover:-translate-y-1`}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div className={`p-3 rounded-xl ${card.bg} ${card.color}`}>
+                <card.icon className="w-6 h-6" />
+              </div>
+              <div className="flex items-center text-xs font-medium text-emerald-600">
+                <TrendingUp className="w-3 h-3 mr-1" />
+                Live
+              </div>
+            </div>
+            <p className="text-3xl font-bold text-gray-900 mb-1">{card.value}</p>
+            <p className="text-sm font-medium text-gray-600">{card.label}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* System Health & Tips */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* System Health */}
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-200 p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-3 bg-gray-100 rounded-xl">
+              <Shield className="w-6 h-6 text-gray-700" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">System Health</h2>
+              <p className="text-gray-500 text-sm">All systems operational</p>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {systemHealth.map((item, index) => (
+              <div key={index} className="bg-gray-50 rounded-xl p-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <item.icon className={`w-5 h-5 ${item.color}`} />
+                  <span className="text-sm font-medium text-gray-700">{item.label}</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse mr-2"></div>
+                  <span className="font-semibold text-gray-900">{item.status}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Quick Tips */}
+        <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl p-6 text-white">
+          <div className="mb-6">
+            <CheckCircle className="w-10 h-10 text-blue-200 mb-4" />
+            <h2 className="text-xl font-bold mb-3">Quick Tips</h2>
+            <p className="text-blue-100 text-sm leading-relaxed">
+              Remember to regularly update event statuses and review new member applications promptly.
+            </p>
+          </div>
+          
+          <button className="w-full py-3 bg-white text-blue-700 font-semibold rounded-xl hover:bg-blue-50 transition-colors text-sm">
+            View Documentation
+          </button>
+        </div>
+      </div>
+
+      {/* Recent Activity Placeholder */}
+      <div className="bg-white rounded-2xl border border-gray-200 p-6">
+        <h2 className="text-xl font-bold text-gray-900 mb-4">Recent Activity</h2>
+        <div className="text-center py-8">
+          <Activity className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+          <p className="text-gray-500 font-medium">Activity feed will appear here</p>
+          <p className="text-gray-400 text-sm mt-1">Actions and updates will be displayed in real-time</p>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default DashboardHome;
