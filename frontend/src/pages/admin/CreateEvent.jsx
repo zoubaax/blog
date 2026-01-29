@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import eventService from '../../services/eventService';
 import ImageUpload from '../../components/ImageUpload';
-import { Save, ArrowLeft, Loader2, Calendar, MapPin, Users, clock, Clock } from 'lucide-react';
+import { Save, ArrowLeft, Loader2, Calendar, MapPin, Users, Clock } from 'lucide-react';
 
 const CreateEvent = () => {
     const navigate = useNavigate();

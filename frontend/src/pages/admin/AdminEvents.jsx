@@ -97,6 +97,10 @@ const AdminEvents = () => {
                                 <MapPin className="w-4 h-4 text-red-500" />
                                 <span>{event.location}</span>
                             </div>
+                            <div className="flex items-center gap-2 text-sm text-gray-500 font-medium">
+                                <Users className="w-4 h-4 text-purple-500" />
+                                <span>{event.current_registrations || 0} {event.max_participants ? `/ ${event.max_participants}` : ''} registered</span>
+                            </div>
                         </div>
 
                         <p className="text-gray-600 text-sm line-clamp-2 mb-6 h-10">

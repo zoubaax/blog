@@ -47,6 +47,7 @@ const EventDetail = () => {
     const eventDate = new Date(event.date);
     const deadline = event.registration_deadline ? new Date(event.registration_deadline) : null;
     const isDeadlinePassed = deadline && new Date() > deadline;
+    const isFull = event.max_participants && event.current_registrations >= event.max_participants;
 
     return (
         <div className="max-w-6xl mx-auto px-4 py-8">
@@ -95,12 +96,14 @@ const EventDetail = () => {
                             </div>
                             {event.max_participants && (
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center">
+                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isFull ? 'bg-red-50 text-red-600' : 'bg-purple-50 text-purple-600'}`}>
                                         <Users className="w-5 h-5" />
                                     </div>
                                     <div className="flex flex-col">
                                         <span className="text-xs text-gray-400 uppercase font-bold tracking-wider">Capacity</span>
-                                        <span>Max {event.max_participants} people</span>
+                                        <span className={isFull ? 'text-red-600 font-bold' : ''}>
+                                            {isFull ? 'Event Full' : `${event.current_registrations} / ${event.max_participants} joined`}
+                                        </span>
                                     </div>
                                 </div>
                             )}
@@ -129,7 +132,8 @@ const EventDetail = () => {
                         <EventRegistrationForm
                             eventId={event.id}
                             eventTitle={event.title}
-                            isDisabled={isDeadlinePassed}
+                            isDeadlinePassed={isDeadlinePassed}
+                            isFull={isFull}
                         />
                     </div>
                 </div>

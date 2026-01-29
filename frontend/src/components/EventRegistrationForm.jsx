@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { User, Mail, Phone, School, CheckCircle, Loader2, AlertCircle } from 'lucide-react';
+import { User, Mail, Phone, School, CheckCircle, Loader2, AlertCircle, Users, Clock } from 'lucide-react';
 import registrationService from '../services/registrationService';
 
-const EventRegistrationForm = ({ eventId, eventTitle, isDisabled }) => {
+const EventRegistrationForm = ({ eventId, eventTitle, isDeadlinePassed, isFull }) => {
+    const isDisabled = isDeadlinePassed || isFull;
     const [formData, setFormData] = useState({
         full_name: '',
         email: '',
@@ -42,15 +43,29 @@ const EventRegistrationForm = ({ eventId, eventTitle, isDisabled }) => {
         }
     };
 
-    if (isDisabled) {
+    if (isDeadlinePassed) {
         return (
-            <div className="bg-gray-50 border border-gray-200 p-8 rounded-2xl text-center space-y-4">
-                <div className="w-16 h-16 bg-gray-100 text-gray-400 rounded-full flex items-center justify-center mx-auto">
-                    <AlertCircle className="w-10 h-10" />
+            <div className="bg-amber-50 border border-amber-100 p-8 rounded-2xl text-center space-y-4">
+                <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto">
+                    <Clock className="w-10 h-10" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900">Registration Closed</h3>
-                <p className="text-gray-500 text-sm">
-                    The deadline for this event has passed. We hope to see you at our next event!
+                <p className="text-amber-700 text-sm">
+                    The registration deadline for this event has passed. We hope to see you at our next event!
+                </p>
+            </div>
+        );
+    }
+
+    if (isFull) {
+        return (
+            <div className="bg-red-50 border border-red-100 p-8 rounded-2xl text-center space-y-4">
+                <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto">
+                    <Users className="w-10 h-10" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">Event is Full</h3>
+                <p className="text-red-700 text-sm">
+                    Maximum capacity reached! All registration slots for this event have been filled.
                 </p>
             </div>
         );

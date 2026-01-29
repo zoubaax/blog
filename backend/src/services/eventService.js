@@ -1,11 +1,20 @@
 const eventModel = require('../models/eventModel');
+const registrationModel = require('../models/registrationModel');
 const AppError = require('../utils/appError');
 
 const getAllEvents = async (isAdmin = false) => {
+    let events;
     if (isAdmin) {
-        return await eventModel.findAll();
+        events = await eventModel.findAll();
+        // For admin, add registration counts to each event
+        events = await Promise.all(events.map(async (event) => {
+            const count = await registrationModel.countByEvent(event.id);
+            return { ...event, current_registrations: count };
+        }));
+    } else {
+        events = await eventModel.findAllVisible();
     }
-    return await eventModel.findAllVisible();
+    return events;
 };
 
 const getEventById = async (id) => {
@@ -13,6 +22,11 @@ const getEventById = async (id) => {
     if (!event) {
         throw new AppError('Event not found', 404);
     }
+
+    // Add current registration count
+    const count = await registrationModel.countByEvent(id);
+    event.current_registrations = count;
+
     return event;
 };
 
@@ -35,7 +49,26 @@ const updateEvent = async (id, data) => {
         throw new AppError('Event not found', 404);
     }
 
-    const {
+    // Determine if this is a partial update (like toggle visibility) or full update
+    // If 'title' is missing, it's likely a partial update
+    const isFullUpdate = data.title !== undefined;
+
+    const title = data.title !== undefined ? data.title : existing.title;
+    const description = data.description !== undefined ? data.description : existing.description;
+    const date = data.date !== undefined ? data.date : existing.date;
+    const location = data.location !== undefined ? data.location : existing.location;
+    const cover_image_url = data.cover_image_url !== undefined ? data.cover_image_url : existing.cover_image_url;
+    const is_hidden = data.is_hidden !== undefined ? data.is_hidden : existing.is_hidden;
+
+    // For limits, we must be careful: if they are in the request, use them (even if null). 
+    // If NOT in the request, keep existing.
+    const registration_deadline = data.hasOwnProperty('registration_deadline') ? data.registration_deadline : existing.registration_deadline;
+    const max_participants = data.hasOwnProperty('max_participants') ? data.max_participants : existing.max_participants;
+
+    console.log(`[SERVICE] Updating Event ${id}. Max Participants mapped to: ${max_participants}`);
+
+    return await eventModel.update(
+        id,
         title,
         description,
         date,
@@ -44,20 +77,6 @@ const updateEvent = async (id, data) => {
         is_hidden,
         registration_deadline,
         max_participants
-    } = data;
-
-    const final_is_hidden = is_hidden !== undefined ? is_hidden : existing.is_hidden;
-
-    return await eventModel.update(
-        id,
-        title || existing.title,
-        description || existing.description,
-        date || existing.date,
-        location || existing.location,
-        cover_image_url,
-        final_is_hidden,
-        registration_deadline !== undefined ? registration_deadline : existing.registration_deadline,
-        max_participants !== undefined ? max_participants : existing.max_participants
     );
 };
 

@@ -26,17 +26,27 @@ const create = async (title, description, date, location, coverImageUrl, registr
 };
 
 const update = async (id, title, description, date, location, coverImageUrl, is_hidden, registrationDeadline, maxParticipants) => {
+    // Final check for the database format
+    const dbMaxParticipants = (maxParticipants === null || maxParticipants === '') ? null : parseInt(maxParticipants);
+    const dbDeadline = (registrationDeadline === null || registrationDeadline === '') ? null : registrationDeadline;
+
+    console.log(`[MODEL] Executing Update for ID ${id}. DB MaxParticipants: ${dbMaxParticipants}`);
+
     const result = await db.query(
         `UPDATE events 
-     SET title = $1, description = $2, date = $3, location = $4, 
-         cover_image_url = COALESCE($5, cover_image_url), 
-         is_hidden = $6,
-         registration_deadline = $7,
-         max_participants = $8,
-         updated_at = CURRENT_TIMESTAMP 
-     WHERE id = $9 RETURNING *`,
-        [title, description, date, location, coverImageUrl, is_hidden, registrationDeadline, maxParticipants, id]
+         SET title = $1, 
+             description = $2, 
+             date = $3, 
+             location = $4, 
+             cover_image_url = $5, 
+             is_hidden = $6,
+             registration_deadline = $7,
+             max_participants = $8,
+             updated_at = CURRENT_TIMESTAMP 
+         WHERE id = $9 RETURNING *`,
+        [title, description, date, location, coverImageUrl, is_hidden, dbDeadline, dbMaxParticipants, id]
     );
+
     return result.rows[0];
 };
 

@@ -26,6 +26,8 @@ const create = catchAsync(async (req, res) => {
 });
 
 const update = catchAsync(async (req, res) => {
+    console.log('--- API UPDATE REQUEST BODY ---');
+    console.log(req.body);
     const updatedEvent = await eventService.updateEvent(req.params.id, req.body);
     res.status(200).json({ success: true, data: updatedEvent });
 });
